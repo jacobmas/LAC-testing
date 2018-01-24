@@ -1,14 +1,14 @@
-K=GF(251)
-n=4
+K=IntegerModRing(1024)
+n=8
 f=x**n+1
 c=0
-g=x**(n/2)+91*x**(n/4)+250
-h=x**(n/4)+160*x**(n/4)+250
+g=x**(n/4)+1
+#h=x**(n/4)+160*x**(n/4)+250
 R=K['x'].quotient(x**(n)+1)
-T=K['x'].quotient(x**(n/2)+91*x**(n/4)+250)
+T=K['x'].quotient(x**(n/4)+1)
 
 fact_dict={}
-for ww in range(0,251):
+for ww in range(0,2):
     fact_dict={}
     for i in range(0,3**n):
         j=i

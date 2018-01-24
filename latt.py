@@ -111,8 +111,8 @@ def my_gen_lattice2(n=4, q=11, seed=None,
             raise ValueError("cyclotomic bases require that n "
                                  "is an image of Euler's totient function")
     R = ZZ_q['x'].quotient(cyclotomic_polynomial(k, 'x'), 'x')
-    g=x**(n/2)+91*x**(n/4)-1
-    T=ZZ_q['x'].quotient(x**(n/2)+91*x**(n/4)-1)
+    g=x**(n/2)+1
+    T=ZZ_q['x'].quotient(x**(n/2)+1)
  
    
     a_pol=R.random_element()
