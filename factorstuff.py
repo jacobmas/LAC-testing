@@ -35,7 +35,8 @@ def do_factor(m=4, q=11):
  
     from sage.arith.all import euler_phi
     from sage.misc.functional import cyclotomic_polynomial
- 
+    
+    for a in range(
     R = ZZ_q['x']#.quotient(cyclotomic_polynomial(k, 'x'), 'x')
     f=cyclotomic_polynomial(m,'x')
     return f.factor()

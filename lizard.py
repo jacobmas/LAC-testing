@@ -1,13 +1,12 @@
-CDF_TABLE=[7,67,247,382]
-my_list=[]
-for i in range(1,1024):
-    def xfunc(x):
-        y=(x*i)%1024
-        return y
-    mod_table=sorted(list(map(xfunc, CDF_TABLE)))
-    my_list.append((i,mod_table))
-#    print("{0}: {1}".format(i,mod_table))
-my_new=sorted(my_list,key=lambda x:x[1][3],reverse=True)
+R=PolynomialRing(ZZ,'x')
 
-for i in my_new:
-    print("{0}: {1}".format(i[0],i[1]))
+def create_spter_vec(len,h_weight):
+    h_arr=[2 if i % 2 == 0 else 0 for i in range(0,h_weight)]
+    h_arr.extend([1 for i in range(h_weight,len)])
+    rnd_arr=[randrange(0,65536) for i in range(0,len)]
+    ret_vec=[(~0x3 & rnd_arr[i]) ^ (h_arr[i] & 0x3) for i in range(0,len)]
+    bob=sorted(ret_vec)
+    ret_vec = [(bob[i] & 0x3) - 1 for i in range(0,len)]
+    return ret_vec
+
+    
