@@ -26,8 +26,10 @@ def decode_message(S,q,noisy_pol):
     for i in range(len(noisy_lift)):
         x=ZZ(noisy_lift[i]) % q
 #        print('x={0}'.format(x))
-        if x < 0:
+        while x < 0:
             x=x+q
+        while x >= q:
+            x=x-q
         if q/4. <= x and x < 3.*q/4.:
             ret_msg.append(1)
         else:
@@ -36,16 +38,18 @@ def decode_message(S,q,noisy_pol):
     
 
  
-def test_correctness(n=512, q=251, seed=None):
+def test_correctness(n=512, c2_vec_num=None, q=251, seed=None):
     """
     Testing LAC PQC submission correctness values
-    n = such that ring is x^{n}+1 (not checking for power of 2 yet though) 
+    n = such that ring is x^{n}+1 (not checking for power of 2  though) 
     q = modulus
 
-    Returns number of positions where things differ
+    Returns number of positions where decrypted message differs from encrypted message
  
  
     """
+    if c2_vec_num is None:
+        c2_vec_num = n
        
     if seed is not None:
         from sage.misc.randstate import set_random_seed
@@ -94,87 +98,17 @@ def test_correctness(n=512, q=251, seed=None):
         return 1 if x!=y else 0
     mult_message= [comp_mess(message[i],decoded_message[i]) for i in range(len(decoded_message))]
     diff_weight=reduce(lambda x,y: x+y, mult_message)
-#    print(message)
-#    print(decoded_message)
-#    print(mult_message)
-    #print('message={0}\nDecoded message={1}\n'.format(message,decoded_message))
+
     return diff_weight
 
-def test_correctness2(n=512, q=251, seed=None):
-    """
-    Testing LAC PQC submission correctness values
-    n = such that ring is x^{n}+1 (not checking for power of 2 yet though) 
-    q = modulus
-
-    Returns number of positions where things differ
- 
- 
-    """
-    from sage.rings.finite_rings.integer_mod_ring import IntegerModRing
-    from sage.matrix.constructor import identity_matrix, block_matrix
-    from sage.matrix.matrix_space import MatrixSpace
-    from sage.rings.integer_ring import IntegerRing
-    from sage.modules.free_module_integer import IntegerLattice
-       
-    if seed is not None:
-        from sage.misc.randstate import set_random_seed
-        set_random_seed(seed)
- 
- 
-    ZZ = IntegerRing()
-    ZZ_q = IntegerModRing(q)
-    
- 
-
-    #R=PolynomialRing(Integers(q),'x',implementation="FLINT")
- 
-    R = ZZ_q['x'].quotient(cyclotomic_polynomial(2*n, 'x'), 'x')
-    bar_q=R((q-1)/2)
-    
-    # Set up public key 
-    a_pol=R.random_element()
-#    print("type(a_pol)={0}, type(a_pol.lift())={1}".format(type(a_pol),type(a_pol.lift())))
-
-    s_pol=sample_noise(R)
-    e_pol=sample_noise(R)
-
-    b_pol=R(a_pol.lift()*s_pol.lift()+e_pol.lift())
 
 
-    # Set up encryption
-    message = sample_message(R.degree())
-
-    r_pol = sample_noise(R)
-    e1_pol = sample_noise(R)
-    e2_pol = sample_noise(R)
-
-    c1_pol = R(a_pol.lift() * r_pol.lift() + e1_pol.lift())
-    c2_pol = R(b_pol.lift() * r_pol.lift() + e2_pol.lift()) + bar_q * R(message)
-
-
-    # Set up decryption
-    u_pol = R(c1_pol.lift() * s_pol.lift())
-
-    noisy_pol = R(c2_pol - u_pol)
-
-    decoded_message = decode_message(R,q,noisy_pol)
-
-    def comp_mess(x,y):
-        return 1 if x!=y else 0
-    mult_message= [comp_mess(message[i],decoded_message[i]) for i in range(len(decoded_message))]
-    diff_weight=reduce(lambda x,y: x+y, mult_message)
-#    print(message)
-#    print(decoded_message)
-#    print(mult_message)
-    #print('message={0}\nDecoded message={1}\n'.format(message,decoded_message))
-    return diff_weight
-
-def get_fail_probs(runs=100000,n=512,q=251):
+def get_fail_probs(runs=100000,n=512,c2_vec_num=None,q=251):
     fail_map={}
     for i in range(513):
         fail_map[i]=0
     for i in range(runs):
-        y=test_correctness(n,q)
+        y=test_correctness(n,c2_vec_num,q)
         fail_map[y]+=1
         if i % 1000==0:
             print("i={0}".format(i))
