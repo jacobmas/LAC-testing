@@ -81,14 +81,14 @@ def decode_message(S,q,noisy_pol):
     
 
  
-def test_correctness(n=512, c2_vec_num=None, q=251, seed=None, hamming_add=0):
+def test_correctness(n=512, c2_vec_num=None, q=251, seed=None):
     """
     Testing LAC PQC submission correctness values
     n = such that ring is x^{n}+1 (not checking for power of 2  though) 
     q = modulus
 
     Returns number of positions where decrypted message differs from encrypted message
-    ``hamming_add`` - for doing maximum hamming weight type testing
+ 
  
     """
     if c2_vec_num is None:
@@ -112,9 +112,9 @@ def test_correctness(n=512, c2_vec_num=None, q=251, seed=None, hamming_add=0):
     
     # Set up public key 
     a_pol=R.random_element()
-    lac_samp=(sample_binom,-1,1) # shorten command
-    s_pol=R(sample_noise(length=n,max_hamming=n,sample_elem=lac_samp))
-    e_pol=R(sample_noise(length=n,max_hamming=n,sample_elem=lac_samp))
+
+    s_pol=R(sample_noise)
+    e_pol=R(sample_noise)
 
     b_pol=(a_pol*s_pol+e_pol)
 
@@ -122,11 +122,9 @@ def test_correctness(n=512, c2_vec_num=None, q=251, seed=None, hamming_add=0):
     # Set up encryption
     message = sample_message(R.degree())
 
-    my_hamm=n/2+hamming_add
-    
-    r_pol = R(sample_noise(length=n,max_hamming=my_hamm))
-    e1_pol = R(sample_noise(length=n,max_hamming=my_hamm))
-    e2_pol = R(sample_noise(length=n,max_hamming=my_hamm))
+    r_pol = R(sample_noise)
+    e1_pol = R(sample_noise)
+    e2_pol = R(sample_noise)
 
     c1_pol = a_pol * r_pol + e1_pol
     c2_pol = b_pol * r_pol + e2_pol + bar_q * R(message)
@@ -148,29 +146,22 @@ def test_correctness(n=512, c2_vec_num=None, q=251, seed=None, hamming_add=0):
 
 
 
-def get_fail_probs(runs=100000,n=512,c2_vec_num=None,q=251, hamming_add=0):
+def get_fail_probs(runs=100000,n=512,c2_vec_num=None,q=251):
     fail_map={}
-    for i in range(n+1):
+    for i in range(513):
         fail_map[i]=0
     for i in range(runs):
-        y=test_correctness(n,c2_vec_num,q=q,hamming_add=hamming_add)
+        y=test_correctness(n,c2_vec_num,q)
         fail_map[y]+=1
         if i % 1000==0:
             print("i={0}".format(i))
         if i % 5000 == 0:
-            for j in range(n+1):
+            for j in range(513):
                 if fail_map[j]>0:
                     print("{0}: {1}".format(j,fail_map[j]))            
-    for i in range(n+1):
+    for i in range(513):
         if fail_map[i]>0:
             print("{0}: {1}".format(i,fail_map[i]))
-
-def compute_failure(n,t,delta):
-    result=0.0
-    for i in range(t+1,n+1):
-        curr_val=binomial(n,i)*pow(1-delta,n-i)*pow(delta,i)
-        result=result+curr_val
-    return result
     
 
 
